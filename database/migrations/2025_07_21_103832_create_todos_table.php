@@ -19,6 +19,7 @@ return new class extends Migration
             $table->enum('status', ['pending','in_progress','completed','cancelled'])->default('pending');
             $table->enum('priority', ['low','medium','high'])->default('medium');
             $table->datetime('due_date')->nullable(); // Deadline gibi son bitiş tarihi
+            $table->softDeletes();
             $table->timestamps();
         });
     }
