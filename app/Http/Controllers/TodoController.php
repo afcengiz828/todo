@@ -6,6 +6,7 @@ use App\Enums\Priority;
 use App\Enums\Status;
 use App\Http\Resources\TodoResources;
 use App\Models\todo as Todo;
+use Eloquent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
@@ -15,9 +16,63 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $page = $request->query('page');
+        $limit = $request->query('limit');
+        $sort = $request->query('sort');
+        $order = $request->query('order');
+        $status = $request->query('status');
+        $priority = $request->query('priority');
+
+        if($limit < 10 ) {
+            $limit = 10;
+        }
+        elseif($limit > 50){
+            $limit = 50;
+        }
+
+        if($page > $limit or !$page){
+            $page = 1;
+        }
+
+        if($order != "asc" or "desc"){
+            $order = "asc";
+        }
+
+        if(!$sort){
+            $sort = "id";
+        }
+
+        $query = Todo::query();
+
+        if($status){
+            $query->where('status', $status);
+        }
+        if($priority){
+            $query->where('priority', $priority);
+        }
+
+        // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
+        $query->orderBy($sort, $order);
+        
+        $todos = $query->paginate($limit, ['*'], 'page', $page);
+
+        
+        if(!$todos->isEmpty()){
+        
+            return response()->json([
+                "status"=> "succes",
+                "message"=> "İstenen todolar döndürüldü",   
+                "data"=> TodoResources::collection($todos),
+                              
+            ],200);
+        }
+        
+        return response()->json([
+            "status"=> "error",
+            "message"=> "hata alındı todolar bulunamadı",
+        ]);
     }
 
     /**
