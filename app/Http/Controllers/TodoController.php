@@ -133,5 +133,35 @@ class TodoController extends Controller
         
     }
 
+    public function search(Request $request)
+    {
+        
+
+        $data = $request->input('q');
+
+        
+        if(!$data){
+            return response()->json([
+                'status'=> 'error',
+                'message'=> 'Arama terimi boş olamaz'
+            ],400);
+        }
+        
+        $todos = Todo::where('title','like','%'. $data .'%')->orWhere('description','like','%'. $data .'%')->get();
+
+        if(!$todos->isEmpty()){
+            return response()->json([
+                'status'=> 'success',
+                'message'=> 'Aradığınız todo bulundu',
+                'data'=> TodoResources::collection($todos)
+            ],200);
+        }
+
+         return response()->json([
+             "status"=> "error",
+             "message"=> "Aradığınız  todo bulunamadı.",
+         ],404);
+       
+    }
     
 }
