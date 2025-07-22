@@ -24,7 +24,9 @@ class TodoController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {        
+    {     
+        
+
         $validator = Validator::make($request->all(), [
             "title" => ["sometimes", "required", "min:3", "max:100"],
             "description"=> ["sometimes", "max:500"],
@@ -54,7 +56,20 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $todo = Todo::find($id);
+
+        if(!$todo){
+            return response()->json([
+                "status"=> "error",
+                "message"=> "Aradığınız todo bulundamadı"
+            ],404);
+        }
+
+        return response()->json([
+            "status"=> "success",
+            "message"=> "Todo başarıyla bulundu",
+            "data" => new TodoResources(($todo)),
+        ]);
     }
 
     /**
