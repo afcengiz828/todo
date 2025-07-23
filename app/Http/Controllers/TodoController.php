@@ -10,6 +10,7 @@ use Eloquent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
+use Mews\Purifier\Facades\Purifier;
 
 class TodoController extends Controller
 {
@@ -90,6 +91,10 @@ class TodoController extends Controller
             "due_date"=> ["sometimes", "date_format:Y-m-d", "after:today"],
         ]);
 
+        //dd(Purifier::clean("<script>alert('xss')</script>"));
+
+          
+
         if ($validator->fails()) {
             return response()->json([
                 "status"=> "error",
@@ -97,7 +102,14 @@ class TodoController extends Controller
                 ],422);            
         }
 
-        $todo = Todo::create($request->all());
+        $validated = $validator->validated();
+
+        $validated["title"] = Purifier::clean($validated["title"]);
+        $validated["description"] = Purifier::clean($validated["description"]);  
+
+   
+
+        $todo = Todo::create($validated);
 
         return response()->json([
             "status"=> "success",

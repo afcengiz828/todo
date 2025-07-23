@@ -6,6 +6,6 @@ use App\Http\Controllers\TodoController;
 
 
 Route::get('todos/search', [TodoController::class, "search"]);
-Route::apiResource('todos', TodoController::class);
+Route::apiResource('todos', TodoController::class)->middleware('checkData');
 
 ?>
