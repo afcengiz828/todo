@@ -6,6 +6,7 @@ use App\Enums\Priority;
 use App\Enums\Status;
 use App\Http\Resources\TodoResources;
 use App\Models\todo as Todo;
+use App\Providers\TodoProvider;
 use Eloquent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,105 +18,46 @@ class TodoController extends Controller
     /**
      * Display a listing of the resource.
      */
+    protected $todoProvider;
+
+    public function __construct(TodoProvider $todoProvider)
+    {
+        $todo = $this->todoProvider = $todoProvider; //DI kullanımı        
+    }
+
+
     public function index(Request $request)
     {
-        $page = $request->query('page');
-        $limit = $request->query('limit');
-        $sort = $request->query('sort');
-        $order = $request->query('order');
-        $status = $request->query('status');
-        $priority = $request->query('priority');
+        $todos = $this->todoProvider->index($request);
 
-        if($limit < 10 ) {
-            $limit = 10;
-        }
-        elseif($limit > 50){
-            $limit = 50;
-        }
-
-        if($page > $limit or !$page){
-            $page = 1;
-        }
-
-        if($order != "asc" or "desc"){
-            $order = "asc";
-        }
-
-        if(!$sort){
-            $sort = "id";
-        }
-
-        $query = Todo::query();
-
-        if($status){
-            $query->where('status', $status);
-        }
-        if($priority){
-            $query->where('priority', $priority);
-        }
-
-        // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
-        $query->orderBy($sort, $order);
-        
-        $todos = $query->paginate($limit, ['*'], 'page', $page);
-
-        
-        if(!$todos->isEmpty()){
-        
+        if($todos[0]){
             return response()->json([
                 "status"=> "succes",
-                "message"=> "İstenen todolar döndürüldü",   
-                "data"=> TodoResources::collection($todos),
-                              
+                "message"=> $todos[1],
+                "data"=> $todos[2],
             ],200);
         }
         
         return response()->json([
             "status"=> "error",
-            "message"=> "hata alındı todolar bulunamadı",
-        ]);
+            "message"=> $todos[1],
+        ], $todos[2]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {     
-        
+    {       
+        $todo = $this->todoProvider->store($request);
 
-        $validator = Validator::make($request->all(), [
-            "title" => ["sometimes", "required", "min:3", "max:100"],
-            "description"=> ["sometimes", "max:500"],
-            "status"=> ["sometimes", new Enum(Status::class)],
-            "priority"=> ["sometimes", new Enum(Priority::class)],
-            "due_date"=> ["sometimes", "date_format:Y-m-d", "after:today"],
-        ]);
-
-        //dd(Purifier::clean("<script>alert('xss')</script>"));
-
-          
-
-        if ($validator->fails()) {
+        if($todo[0]){
             return response()->json([
-                "status"=> "error",
-                "message"=> "Form verisini eksisiz ve doğru bir şekilde doldurun"
-                ],422);            
+                "status"=> "succes",
+                "message"=> $todo[1],
+                "data"=> $todo[2],
+            ],200);
         }
-
-        $validated = $validator->validated();
-
-        $validated["title"] = Purifier::clean($validated["title"]);
-        $validated["description"] = Purifier::clean($validated["description"]);  
-
-   
-
-        $todo = Todo::create($validated);
-
-        return response()->json([
-            "status"=> "success",
-            "message"=> "Todo başarıyla oluşturuldu",
-            "data" => new TodoResources(($todo)),
-        ],201);
     }
 
     /**
@@ -123,20 +65,21 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $todo = Todo::find($id);
+        $todo = $this->todoProvider->show($id);
 
-        if(!$todo){
+        if($todo[0]){
             return response()->json([
-                "status"=> "error",
-                "message"=> "Aradığınız todo bulundamadı"
-            ],404);
+                "status"=> "succes",
+                "message"=> $todo[1],
+                "data"=> $todo[2],
+            ],200);
         }
-
+        
         return response()->json([
-            "status"=> "success",
-            "message"=> "Todo başarıyla bulundu",
-            "data" => new TodoResources(($todo)),
-        ]);
+            "status"=> "error",
+            "message"=> $todo[1],
+        ], $todo[2]);
+
     }
 
     /**
@@ -144,36 +87,20 @@ class TodoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validator = Validator::make($request->all(), [
-            "title" => [$request->isMethod("patch") ? "sometimes" : "required", "min:3", "max:100"],
-            "description"=> ["sometimes", "max:500"],
-            "status"=> [$request->isMethod("patch") ? "sometimes" : "required"  , new Enum(Status::class)],
-            "priority"=> ["sometimes", new Enum(Priority::class)],
-            "due_date"=> ["sometimes", "date_format:Y-m-d", "after:today"],
-        ]);
+        $todo = $this->todoProvider->update($request, $id);
 
-        if ($validator->fails()) {
+        if($todo[0]){
             return response()->json([
-                "status"=> "error",
-                "message"=> "Yanlış veya eksik veri girdiniz. Güncelleme işlemi için lütfen veriyi doğru girin.",
-            ],422);
+                "status"=> "succes",
+                "message"=> $todo[1],
+                "data"=> $todo[2],
+            ],200);
         }
-
-        $todo = Todo::find($id);
-        if(!$todo){
-            return response()->json([
-                "status"=> "error",
-                "message"=> "Aradığınız todo bulundamadı"
-            ],404);
-        }
-        $todo->update($request->all());
-
+        
         return response()->json([
-            "status"=> "success",
-            "message"=> "Güncelleme işlemi başarılı.",
-            "process" => $request->isMethod("patch") ? "patch" : "put",
-            "data" => new TodoResources($todo)
-        ],200);
+            "status"=> "error",
+            "message"=> $todo[1],
+        ], $todo[2]);
     }
 
     /**
@@ -181,54 +108,37 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        $todo = Todo::find($id);
+        $todo = $this->todoProvider->destroy($id);   
 
-        if(!$todo){
+        if($todo[0]){
             return response()->json([
-                "status"=> "error",
-                "message"=> "Aradığınız todo bulunamadı."
-            ],404);
+                "status"=> "succes",
+                "message"=> $todo[1],
+            ], $todo[2]);
         }
 
-        if ($todo->trashed())   {}
-        else    {   $todo->delete();    }
-        
         return response()->json([
-            "status"=> "success",
-            "message"=> "Silme işlemi başarılı."
-        ],200);
-        
+                "status"=> "error",
+                "message"=> $todo[1],
+            ], $todo[2]);       
     }
 
     public function search(Request $request)
     {
-        
+        $todos = $this->todoProvider->search($request);
 
-        $data = $request->input('q');
-
-        
-        if(!$data){
+        if($todos[0]){
             return response()->json([
-                'status'=> 'error',
-                'message'=> 'Arama terimi boş olamaz'
-            ],400);
-        }
-        
-        $todos = Todo::where('title','like','%'. $data .'%')->orWhere('description','like','%'. $data .'%')->get();
-
-        if(!$todos->isEmpty()){
-            return response()->json([
-                'status'=> 'success',
-                'message'=> 'Aradığınız todo bulundu',
-                'data'=> TodoResources::collection($todos)
-            ],200);
+            'status'=> 'success',
+            'message'=> $todos[1],
+            'data'=> $todos[2],
+        ],200);
         }
 
-         return response()->json([
-             "status"=> "error",
-             "message"=> "Aradığınız  todo bulunamadı.",
-         ],404);
-       
+        return response()->json([
+            'status'=> 'error',
+            'message'=> $todos[1],
+        ],$todos[2]);
     }
     
 }
