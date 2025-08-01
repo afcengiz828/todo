@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             //$table->bigInteger('id')->unsigned()->primary()->autoIncrement();
             $table->string('title', 255)->nullable(false);
-            $table->text('description')->nullable(false);
+            $table->text('description')->nullable();
             $table->enum('status', ['pending','in_progress','completed','cancelled'])->default('pending');
             $table->enum('priority', ['low','medium','high'])->default('medium');
-            $table->datetime('due_date')->nullable(); // Deadline gibi son bitiş tarihi
+            $table->date('due_date')->nullable(); // Deadline gibi son bitiş tarihi
             $table->softDeletes();
             $table->timestamps();
         });

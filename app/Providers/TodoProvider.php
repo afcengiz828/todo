@@ -8,6 +8,7 @@ use App\Enums\Status;
 use App\Http\Resources\TodoResources;
 use App\Models\todo as Todo;
 use Eloquent;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
@@ -34,6 +35,8 @@ class TodoProvider extends ServiceProvider
         $status = $request->query('status');
         $priority = $request->query('priority');
 
+        
+        //return null;
         if($limit < 10 ) {
             $limit = 10;
         }
@@ -53,27 +56,36 @@ class TodoProvider extends ServiceProvider
             $sort = "id";
         }
 
+     
         $query = Todo::query();
+
 
         if($status){
             $query->where('status', $status);
         }
+
         if($priority){
             $query->where('priority', $priority);
         }
 
+        
+        if($request->url() == 'http://localhost:8000/api/todos') {
+            return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  TodoResources::collection($query->select()->get())];          
+        }
+
+        
         // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
         $query->orderBy($sort, $order);
         
+      
         $todos = $query->paginate($limit, ['*'], 'page', $page);
 
         
-        if(!$todos->isEmpty()){
-        
+        if(!$todos->isEmpty()){       
             return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  TodoResources::collection($todos)];
         }
         
-        return [false, "Aradığınız kriterlere uygun todo'lar bulunamadı.",  404];
+        //return [false, "Aradığınız todo bulunamadı.",  404];
         
     }
 
@@ -82,8 +94,8 @@ class TodoProvider extends ServiceProvider
      */
     public function store(Request $request)
     {
+        //$request->due_date->format("Y-m-d");
         $todo = Todo::create($request->all());
-
         return [true, "Todo başarıyla oluşturuldu.",new TodoResources($todo)];
     }
 
@@ -94,11 +106,21 @@ class TodoProvider extends ServiceProvider
     {
         $todo = Todo::find($id);
 
-        if(!$todo){
-            return [false, "Aradığınz todo bulunamadı", 404];
+
+        if($todo){
+            return  [
+                true, 
+                "Aradığınız todo bulundu.", 
+                new TodoResources($todo), 
+            ];
         }
 
-        return  [true, "Aradığınız todo bulundu.", new TodoResources($todo)];
+        return  [
+            false, 
+            "Aradığınız todo bulunamadı.", 
+            404
+        ];
+
     }
 
     /**
@@ -109,13 +131,19 @@ class TodoProvider extends ServiceProvider
 
         $todo = Todo::find($id);
 
+
         if(!$todo){
             return [false, "Aradığınz todo bulunamadı", 404];
         }
 
         $todo->update($request->all());
 
-        return  [true, "Todo güncellendi.", new TodoResources($todo)];
+
+        return  [
+            true, 
+            "Todo güncellendi.", 
+            new TodoResources($todo),
+        ];
     }
 
     /**
@@ -125,14 +153,15 @@ class TodoProvider extends ServiceProvider
     {
         $todo = Todo::find($id);
 
+
         if(!$todo){
-            return [false, 'Aradığınız todo bulunamadı.', 404];
+            return [false, 'Aradığınız todo bulunamadı.',404];
         }
 
-        if ($todo->trashed())   {}
-        else    {   $todo->delete();    }
+        if ($todo->trashed())   { return [true, "Zaten silinmiş.",200]; }
+        else    { $todo->delete(); } 
         
-        return [true, "Silme işlemi başarılı.", 200];
+        return [true, "Silme işlemi başarılı.",200];
         
     }
 
@@ -147,7 +176,10 @@ class TodoProvider extends ServiceProvider
             return [false, "Arama terimi boş olamaz.", 400];
         }
         
+        
         $todos = Todo::where('title','like','%'. $data .'%')->orWhere('description','like','%'. $data .'%')->get();
+
+      
 
         if(!$todos->isEmpty()){
             return [true, "Aradığınız todo bulundu.", TodoResources::collection($todos)];

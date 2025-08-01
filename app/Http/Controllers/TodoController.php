@@ -22,7 +22,7 @@ class TodoController extends Controller
 
     public function __construct(TodoProvider $todoProvider)
     {
-        $todo = $this->todoProvider = $todoProvider; //DI kullanımı        
+        $this->todoProvider = $todoProvider; //DI kullanımı        
     }
 
 
@@ -49,15 +49,32 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {       
-        $todo = $this->todoProvider->store($request);
+        $validator = Validator::make($request->all(), [
+            "title" => [ $request->isMethod("patch") ?  "sometimes" : "required", "min:3", "max:100"],
+            "description"=> ["nullable", "max:500"],
+            "status"=> ["sometimes", new Enum(Status::class)],
+            "priority"=> ["sometimes", new Enum(Priority::class)],
+            "due_date"=> ["sometimes", "date_format:Y-M-d", "after:today"],
+        ]);
+        
 
-        if($todo[0]){
-            return response()->json([
-                "status"=> "succes",
-                "message"=> $todo[1],
-                "data"=> $todo[2],
-            ],200);
+        $validated = $validator->validated();
+
+        if($request->isMethod("put")){
+            $validated["title"] = Purifier::clean($validated["title"]);
+            $validated["description"] = Purifier::clean($validated["description"]);  
+            $request->merge($validated);
         }
+
+        $todos = $this->todoProvider->store($request);
+
+        
+        return response()->json([
+            "status"=> "success",
+            "message"=> $todos[1],
+            "data"=> $todos[2],
+        ],200);
+        
     }
 
     /**
@@ -65,20 +82,20 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $todo = $this->todoProvider->show($id);
+        $todos = $this->todoProvider->show($id);
 
-        if($todo[0]){
+        if($todos[0]){
             return response()->json([
                 "status"=> "succes",
-                "message"=> $todo[1],
-                "data"=> $todo[2],
+                "message"=> $todos[1],
+                "data"=> $todos[2],
             ],200);
         }
         
         return response()->json([
-            "status"=> "error",
-            "message"=> $todo[1],
-        ], $todo[2]);
+                "status"=> "succes",
+                "message"=> $todos[1],
+            ],$todos[2]);
 
     }
 
@@ -87,20 +104,20 @@ class TodoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $todo = $this->todoProvider->update($request, $id);
+        $todos = $this->todoProvider->update($request, $id);
 
-        if($todo[0]){
+        if($todos[0]){
             return response()->json([
                 "status"=> "succes",
-                "message"=> $todo[1],
-                "data"=> $todo[2],
+                "message"=> $todos[1],
+                "data"=> $todos[2],
             ],200);
         }
         
         return response()->json([
             "status"=> "error",
-            "message"=> $todo[1],
-        ], $todo[2]);
+            "message"=> $todos[1],
+        ], $todos[2]);
     }
 
     /**
@@ -114,7 +131,7 @@ class TodoController extends Controller
             return response()->json([
                 "status"=> "succes",
                 "message"=> $todo[1],
-            ], $todo[2]);
+            ], 200);
         }
 
         return response()->json([
