@@ -34,7 +34,8 @@ class TodoController extends Controller
             return response()->json([
                 "status"=> "succes",
                 "message"=> $todos[1],
-                "data"=> $todos[2],
+                "data"=> $todos[2][0],
+                "count" => $todos[2][1],
             ],200);
         }
         
@@ -49,31 +50,47 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {       
-        $validator = Validator::make($request->all(), [
-            "title" => [ $request->isMethod("patch") ?  "sometimes" : "required", "min:3", "max:100"],
-            "description"=> ["nullable", "max:500"],
-            "status"=> ["sometimes", new Enum(Status::class)],
-            "priority"=> ["sometimes", new Enum(Priority::class)],
-            "due_date"=> ["sometimes", "date_format:Y-M-d", "after:today"],
-        ]);
+        // return response()->json([
+        //     "status"=> "error",
+        //     "message"=> "Veri aynen döndürüldü",
+        //     "data"=> $request->all()
+        // ],200);
+        
+         $validator = Validator::make($request->all(), [
+             "title" => [ $request->isMethod("patch") ?  "sometimes" : "required", "min:3", "max:100"],
+             "description"=> ["nullable", "max:500"],
+             "status"=> ["sometimes", "nullable",new Enum(Status::class)],
+             "priority"=> ["sometimes", "nullable",new Enum(Priority::class)],
+             "due_date"=> ["nullable", "date_format:Y-m-d", "after:today"],
+         ]);
+
+         if($validator->fails()){
+            return response()->json([
+                "status"=> "error",
+                "message"=> $validator->errors()->first(),
+
+            ],400);
+         }
         
 
-        $validated = $validator->validated();
+         $validated = $validator->validated();
 
-        if($request->isMethod("put")){
-            $validated["title"] = Purifier::clean($validated["title"]);
-            $validated["description"] = Purifier::clean($validated["description"]);  
-            $request->merge($validated);
-        }
+         if($request->isMethod("put")){
+             $validated["title"] = Purifier::clean($validated["title"]);
+             $validated["description"] = Purifier::clean($validated["description"]);  
+             $request->merge($validated);
+         }
 
-        $todos = $this->todoProvider->store($request);
+
+
+         $todos = $this->todoProvider->store($request);
 
         
-        return response()->json([
-            "status"=> "success",
-            "message"=> $todos[1],
-            "data"=> $todos[2],
-        ],200);
+         return response()->json([
+             "status"=> "success",
+             "message"=> $todos[1],
+             "data"=> $todos[2],
+         ],200);
         
     }
 
@@ -131,6 +148,7 @@ class TodoController extends Controller
             return response()->json([
                 "status"=> "succes",
                 "message"=> $todo[1],
+                "data" => $todo[2],
             ], 200);
         }
 

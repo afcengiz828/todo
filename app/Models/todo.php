@@ -15,10 +15,6 @@ class todo extends Model
     protected $fillable = ["title", "description", "status", "priority", "due_date"]; 
 
     protected $casts = [
-        'due_date' => 'date:Y-m-d', // 'date' olarak cast etmek Carbon objesi yapar
-        // Veya sadece tarih bekliyorsanız:
-        // 'due_date' => 'date', 
-        // Veya belirli bir formatla cast etmek istiyorsanız (okuma ve yazma için):
-        // 'due_date' => 'datetime:Y-m-d', 
+        'due_date' => 'date:Y-m-d', 
     ];
 }

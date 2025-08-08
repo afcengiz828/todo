@@ -28,23 +28,24 @@ class TodoProvider extends ServiceProvider
 
     public function index(Request $request)
     {
-        $page = $request->query('page');
-        $limit = $request->query('limit');
+        $page = (int)$request->query('page');
+        $limit = (int)$request->query('limit');
         $sort = $request->query('sort');
         $order = $request->query('order');
         $status = $request->query('status');
         $priority = $request->query('priority');
 
+        $countQuery = Todo::count();
         
         //return null;
-        if($limit < 10 ) {
+        if($limit and $limit < 10 ) {
             $limit = 10;
         }
-        elseif($limit > 50){
+        elseif($limit and $limit > 50){
             $limit = 50;
         }
 
-        if($page > $limit or !$page){
+        if($page<0){
             $page = 1;
         }
 
@@ -69,20 +70,23 @@ class TodoProvider extends ServiceProvider
         }
 
         
-        if($request->url() == 'http://localhost:8000/api/todos') {
-            return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  TodoResources::collection($query->select()->get())];          
-        }
+        
 
         
         // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
         $query->orderBy($sort, $order);
         
-      
-        $todos = $query->paginate($limit, ['*'], 'page', $page);
+        if($limit and $page){
+            $todos = $query->paginate($limit, ['*'], 'page', $page);
+        }
+        else{
+            $todos = $query->get();
+        }
+
 
         
         if(!$todos->isEmpty()){       
-            return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  TodoResources::collection($todos)];
+            return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  [TodoResources::collection($todos), $countQuery]];
         }
         
         //return [false, "Aradığınız todo bulunamadı.",  404];
@@ -152,7 +156,7 @@ class TodoProvider extends ServiceProvider
     public function destroy(string $id)
     {
         $todo = Todo::find($id);
-
+        
 
         if(!$todo){
             return [false, 'Aradığınız todo bulunamadı.',404];
@@ -161,7 +165,7 @@ class TodoProvider extends ServiceProvider
         if ($todo->trashed())   { return [true, "Zaten silinmiş.",200]; }
         else    { $todo->delete(); } 
         
-        return [true, "Silme işlemi başarılı.",200];
+        return [true, "Silme işlemi başarılı.",$todo];
         
     }
 
