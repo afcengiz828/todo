@@ -16,15 +16,7 @@ Tamamlanmış bir Todo uygulaması. React 19 + Vite ile geliştirilmiş frontend
 ---
 
 ## Teknoloji Stack'i
-- React 19, React Router 7
-- Redux Toolkit 2, React-Redux 9
-- Tailwind CSS 4
-- Vite 7
-- framer-motion 12
-- react-hook-form 7 + Yup 1
-- axios 1
-- date-fns 4
-- lucide-react (ikonlar)
+
 
 ---
 
