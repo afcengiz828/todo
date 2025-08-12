@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('todos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('categories_id')->constrained()->cascadeOnDelete();;
+            $table->foreignId('categories_id')->constrained()->cascadeOnDelete();
             //$table->bigInteger('id')->unsigned()->primary()->autoIncrement();
             $table->string('title', 255)->nullable(false);
             $table->text('description')->nullable();

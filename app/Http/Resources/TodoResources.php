@@ -21,6 +21,7 @@ class TodoResources extends JsonResource
             "status" => $this->status,
             "priority" => $this->priority,
             "due_date" => $this->due_date,
+            "categories" => new CategoryResource($this->whenLoaded('categories')),
             "created_at"=> $this->created_at,
             "updated_at"=> $this->updated_at
         ];

@@ -59,6 +59,7 @@ class TodoController extends Controller
          $validator = Validator::make($request->all(), [
              "title" => [ $request->isMethod("patch") ?  "sometimes" : "required", "min:3", "max:100"],
              "description"=> ["nullable", "max:500"],
+             "categories"=> ["nullable", "string"],
              "status"=> ["sometimes", "nullable",new Enum(Status::class)],
              "priority"=> ["sometimes", "nullable",new Enum(Priority::class)],
              "due_date"=> ["nullable", "date_format:Y-m-d", "after:today"],

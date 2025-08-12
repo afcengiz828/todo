@@ -57,8 +57,7 @@ class TodoProvider extends ServiceProvider
             $sort = "id";
         }
 
-     
-        $query = Todo::query();
+        $query = Todo::with("categories");
 
 
         if($status){
@@ -68,11 +67,7 @@ class TodoProvider extends ServiceProvider
         if($priority){
             $query->where('priority', $priority);
         }
-
-        
-        
-
-        
+    
         // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
         $query->orderBy($sort, $order);
         
@@ -108,7 +103,7 @@ class TodoProvider extends ServiceProvider
      */
     public function show(string $id)
     {
-        $todo = Todo::find($id);
+        $todo = Todo::with("categories")->find($id);
 
 
         if($todo){
