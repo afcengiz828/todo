@@ -19,7 +19,7 @@ class todo extends Model
         'due_date' => 'date:Y-m-d', 
     ];
 
-    public function category(){
+    public function categories(){
         return $this->belongsTo(Category::class);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,6 +24,7 @@ class TodoFactory extends Factory
             "priority"=> $this->faker->randomElement(["low","medium","high"]),
             "due_date"=> $this->faker->date("Y-m-d"),
 
+            'categories_id' => Category::inRandomOrder()->first()->id,
         ];
     }
 }

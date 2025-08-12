@@ -21,7 +21,10 @@ Tamamlanmış bir Todo uygulaması için RESTful JSON API. Laravel 12 ile geliş
 - **ORM**: Eloquent ORM
 - **API**: Laravel API Resources, JSON responses
 - **Güvenlik**: Laravel Validation, mews/purifier
+<<<<<<< HEAD
 - **Test**: PHPUnit, Faker
+=======
+>>>>>>> 74b7a84e42315a427fb8d4d57d92ec8d58928baf
 - **Veri**: Seeder/Factory ile örnek veri (100 adet todo)
 
 ---
