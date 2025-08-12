@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call(TodoSeeder::class);
+        $this->call(CategorySeeder::class);
     }
 }

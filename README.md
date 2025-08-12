@@ -1,36 +1,34 @@
-## Todo App (React + Vite)
+## Todo App API (Laravel)
 
-Tamamlanmış bir Todo uygulaması. React 19 + Vite ile geliştirilmiş frontend ve Laravel 12 ile geliştirilmiş backend API içerir. Redux Toolkit durum yönetimi, Tailwind CSS stillendirme, framer-motion animasyonlar ve react-hook-form + Yup form doğrulama özellikleri mevcuttur.
+Tamamlanmış bir Todo uygulaması için RESTful JSON API. Laravel 12 ile geliştirilmiş backend API, CRUD işlemleri, filtreleme, arama, sıralama ve sayfalama özellikleri içerir. MySQL, PostgreSQL veya SQLite veritabanları desteklenir.
 
 ### Özellikler
 - **CRUD**: Görev ekleme, listeleme, güncelleme, silme
 - **Filtreleme**: Duruma ve önceliğe göre
 - **Arama**: Başlık ve açıklama içinde metin arama
 - **Sıralama**: ID, başlık veya son tarih; artan/azalan yön desteği
-- **Sayfalama**: 10 kayıt/sayfa (istemci tarafı)
-- **Tema**: Koyu/Açık tema geçişi (Tailwind `dark` class)
-- **Doğrulama**: react-hook-form + Yup
-- **Animasyonlar**: framer-motion ile sayfa geçişleri
-- **Duyarlı tasarım**: Mobil uyumlu tablo görünümü
+- **Sayfalama**: Sunucu tarafı sayfalama (10–50 kayıt/sayfa)
+- **Doğrulama**: Laravel Validation + Enum doğrulama
+- **Güvenlik**: Soft delete, input sanitization
+- **API**: RESTful JSON API, CORS desteği
+- **Veritabanı**: MySQL/PostgreSQL/SQLite desteği
 
 ---
 
 ## Teknoloji Stack'i
-- React 19, React Router 7
-- Redux Toolkit 2, React-Redux 9
-- Tailwind CSS 4
-- Vite 7
-- framer-motion 12
-- react-hook-form 7 + Yup 1
-- axios 1
-- date-fns 4
-- lucide-react (ikonlar)
+- **Backend**: PHP 8.2, Laravel 12
+- **Veritabanı**: MySQL/PostgreSQL/SQLite
+- **ORM**: Eloquent ORM
+- **API**: Laravel API Resources, JSON responses
+- **Güvenlik**: Laravel Validation, mews/purifier
+- **Test**: PHPUnit, Faker
+- **Veri**: Seeder/Factory ile örnek veri (100 adet todo)
 
 ---
 
 ## Kurulum Adımları
 
-### 1) Back-end (API) — Laravel 12
+### Laravel 12 API Kurulumu
 
 Proje Laravel 12 ile geliştirilmiş bir RESTful JSON API içerir.  
 API uç noktaları: `GET/POST/PUT/PATCH/DELETE http://localhost:8000/api/todos`
@@ -108,10 +106,20 @@ API uç noktaları: `GET/POST/PUT/PATCH/DELETE http://localhost:8000/api/todos`
 4. CORS
    `config/cors.php` dosyasında `allowed_origins` varsayılan olarak `[*]`. 
 
-#### Çalıştırma (Back-end)
+#### Çalıştırma
 ```bash
 php artisan serve
-# http://localhost:8000
+# API: http://localhost:8000
+# Endpoint: http://localhost:8000/api/todos
+```
+
+**Test için:**
+```bash
+# API'yi test edin
+curl http://localhost:8000/api/todos
+
+# Tarayıcıda açın
+http://localhost:8000/api/todos
 ```
 
 
