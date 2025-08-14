@@ -13,13 +13,13 @@ class todo extends Model
     use HasFactory;
     use SoftDeletes;
 
-    protected $fillable = ["title", "description", "status", "priority", "due_date"]; 
+    protected $fillable = ["title", "description", "status", "priority", "due_date", "categories_id"]; 
 
     protected $casts = [
         'due_date' => 'date:Y-m-d', 
     ];
 
     public function categories(){
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'categories_id');
     }
 }

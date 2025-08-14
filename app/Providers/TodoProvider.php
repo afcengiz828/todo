@@ -38,35 +38,21 @@ class TodoProvider extends ServiceProvider
         $countQuery = Todo::count();
         
         //return null;
-        if($limit and $limit < 10 ) {
-            $limit = 10;
-        }
-        elseif($limit and $limit > 50){
-            $limit = 50;
-        }
+        if($limit and $limit < 10 ) { $limit = 10; }
+        elseif($limit and $limit > 50){ $limit = 50; }
 
-        if($page<0){
-            $page = 1;
-        }
+        if($page<0){ $page = 1; }
 
-        if($order != "asc" or "desc"){
-            $order = "asc";
-        }
+        if($order != "asc" && $order != "desc"){ $order = "asc"; }
 
-        if(!$sort){
-            $sort = "id";
-        }
+        if(!$sort){  $sort = "id"; }
 
         $query = Todo::with("categories");
 
 
-        if($status){
-            $query->where('status', $status);
-        }
+        if($status){ $query->where('status', $status); }
 
-        if($priority){
-            $query->where('priority', $priority);
-        }
+        if($priority) { $query->where('priority', $priority);  }
     
         // $sort sıralama yapılacak sütunu, $order sıralama yönünü belirtir.    
         $query->orderBy($sort, $order);
@@ -84,7 +70,7 @@ class TodoProvider extends ServiceProvider
             return [true, "Aradığınız kriterlere uygun todo'lar bulundu.",  [TodoResources::collection($todos), $countQuery]];
         }
         
-        //return [false, "Aradığınız todo bulunamadı.",  404];
+        return [false, "Aradığınız todo bulunamadı.",  404];
         
     }
 
@@ -95,7 +81,9 @@ class TodoProvider extends ServiceProvider
     {
         //$request->due_date->format("Y-m-d");
         $todo = Todo::create($request->all());
-        return [true, "Todo başarıyla oluşturuldu.",new TodoResources($todo)];
+        $todo->load('categories');
+
+        return [true, "Todo başarıyla oluşturuldu.", new TodoResources($todo)];
     }
 
     /**
@@ -136,6 +124,7 @@ class TodoProvider extends ServiceProvider
         }
 
         $todo->update($request->all());
+        $todo->load('categories');
 
 
         return  [
@@ -176,7 +165,12 @@ class TodoProvider extends ServiceProvider
         }
         
         
-        $todos = Todo::where('title','like','%'. $data .'%')->orWhere('description','like','%'. $data .'%')->get();
+        $todos = Todo::with('categories')
+            ->where(function($query) use ($data) {
+                $query->where('title', 'like', '%'. $data .'%')
+                      ->orWhere('description', 'like', '%'. $data .'%');
+            })
+            ->get();
 
       
 

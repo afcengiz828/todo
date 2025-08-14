@@ -15,7 +15,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return response()->json($categories);
+        return response()->json(["data" => CategoryResources::collection($categories)]);
     }
 
     /**
@@ -29,10 +29,10 @@ class CategoryController extends Controller
         ]);
         
         $category = Category::create($validatedData);
-
+        //dd($category);
         return response()->json([
             'message' => 'Kategori başarıyla oluşturuldu.',
-            'category' => $category,
+            'category' => new CategoryResources($category),
         ], 200);
     }
 
@@ -49,7 +49,7 @@ class CategoryController extends Controller
             ], Response::HTTP_NOT_FOUND); // 404 Not Found
         }
 
-        return response()->json($category);
+        return response()->json(new CategoryResources($category));
     }
 
     /**
@@ -62,11 +62,11 @@ class CategoryController extends Controller
         if (!$category) {
             return response()->json([
                 'message' => 'Kategori bulunamadı.'
-            ], Response::HTTP_NOT_FOUND);
+            ], 404);
         }
 
         $validatedData = $request->validate([
-            'name' => 'required|string|unique:categories,name,'.$category->id.'|max:255',
+            'name' => 'required|string|max:255',
             'color' => 'nullable|string',
         ]);
         
@@ -74,7 +74,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'message' => 'Kategori başarıyla güncellendi.',
-            'category' => $category,
+            'category' => new CategoryResources($category),
         ]);
     }
 
@@ -95,7 +95,8 @@ class CategoryController extends Controller
 
         return response()->json([
             'message' => 'Kategori başarıyla silindi.',
-        ]);
+            "data" => new CategoryResources($category),
+        ]); 
     }
 
     public function todos($id)  {
@@ -108,6 +109,6 @@ class CategoryController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        return response()->json($category);
+        return response()->json(["data" => CategoryResources::collection($category)]);
     }
 }

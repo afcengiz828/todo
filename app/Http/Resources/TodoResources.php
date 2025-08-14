@@ -16,12 +16,13 @@ class TodoResources extends JsonResource
     {
         return [
             "id"=> $this->id,
+            "categories_id" => $this->categories_id,
             "title" => $this->title,
             "description" => $this->description,
             "status" => $this->status,
             "priority" => $this->priority,
             "due_date" => $this->due_date,
-            "categories" => new CategoryResource($this->whenLoaded('categories')),
+            "categories" => new CategoryResources($this->whenLoaded('categories')),
             "created_at"=> $this->created_at,
             "updated_at"=> $this->updated_at
         ];
