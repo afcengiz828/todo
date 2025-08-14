@@ -37,9 +37,15 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+
+    // Bu kısmı Tymon JWT için düzenliyoruz.
+    'api' => [
+        'driver' => 'jwt', // Önemli değişiklik burada
+        'provider' => 'users',
+    ],
     ],
 
     /*

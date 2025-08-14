@@ -22,4 +22,9 @@ class todo extends Model
     public function categories(){
         return $this->belongsTo(Category::class, 'categories_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

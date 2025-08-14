@@ -24,7 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'checkData'=> \App\Http\Middleware\checkData::class,
+            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+            'jwt.refresh' => Tymon\JWTAuth\Http\Middleware\RefreshToken::class,
+            'role' => \App\Http\Middleware\CheckUserRole::class,
         ]);
         
     })

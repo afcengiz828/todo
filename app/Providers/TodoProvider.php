@@ -10,6 +10,7 @@ use App\Models\todo as Todo;
 use Eloquent;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
 use Mews\Purifier\Facades\Purifier;
@@ -47,7 +48,8 @@ class TodoProvider extends ServiceProvider
 
         if(!$sort){  $sort = "id"; }
 
-        $query = Todo::with("categories");
+        $userId = Auth::guard('api')->id();
+        $query = Todo::where("user_id", $userId)->with("categories");
 
 
         if($status){ $query->where('status', $status); }
